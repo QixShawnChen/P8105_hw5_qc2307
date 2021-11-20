@@ -1,0 +1,119 @@
+---
+title: "P8105_hw5_qc2307"
+author: "Qixiang Chen"
+date: "11/20/2021"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(p8105.datasets)
+library(patchwork)
+library(readxl)
+library(httr)
+```
+
+
+Problem 1
+```{r}
+url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
+drug_use_html = read_html(url)
+
+drug_use_html
+
+table_marj = 
+  drug_use_html %>% 
+  html_table() %>% 
+  first() %>%
+  as_tibble()
+```
+
+
+## Problem 2
+Step1: create a dataframe containing all files names.
+```{r}
+file_name = tibble(
+  files = list.files("./untitled folder/data")
+)
+file_name
+```
+
+
+Step2: Iterate over file names and read in data for each subject and saving the result as a new variable in the dataframe.
+```{r}
+dataframe_new = 
+  file_name %>%
+  mutate(
+    data = purrr::map(.x = str_c("./untitled folder/data/", files), ~ read_csv(.x))
+    ) %>%
+  unnest(data) %>%
+  separate(files, into = c("arm", "subject_id", "csv")) %>%
+  select(-csv) %>%
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    names_prefix = "week_",
+    values_to = "observations"
+  ) %>%
+  mutate(
+    arm = recode(arm, "con" = "control", "exp" = "experimental")
+  )
+
+dataframe_new
+```
+
+Step3: Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
+```{r}
+spaghetti_plot = 
+  dataframe_new %>%
+  ggplot(aes(x = week, y = observations, group = subject_id, color = subject_id)) + 
+  geom_point(alpha = 0.3) + 
+  geom_line() + 
+  facet_grid(.~arm) + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(
+    tittle = "Observations on Each Subject Over Time",
+    x = "Week",
+    y = "Observations"
+  )
+
+spaghetti_plot
+```
+
+
+
+# Problem 3
+
+```{r}
+set.seed(10)
+
+iris_with_missing = iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species)) %>%
+  janitor::clean_names()
+
+iris_with_missing
+```
+
+Step2: Write a function to serve filling in the missing values
+```{r}
+filling_table = function(x) {
+  if (is.numeric(x)) {
+    replace_na(x, mean(x, na.rm = TRUE))
+  }
+  else if(is.character(x)) {
+    x = replace_na(x, "virginica")
+  }
+}
+```
+
+
+Step3: Applying the function
+```{r}
+filled_data = map(iris_with_missing, filling_table) %>%
+  as_tibble()
+
+filled_data
+```
+
