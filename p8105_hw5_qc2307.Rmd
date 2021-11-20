@@ -91,7 +91,7 @@ spaghetti_plot =
 
 spaghetti_plot
 ```
-
+Comment:
 
 
 # Problem 3
@@ -112,7 +112,7 @@ requirement1: For numeric variables, you should fill in missing values with the 
 requirement2: For character variables, you should fill in missing values with "virginica".
 ```{r}
 filling_table = function(x) {
-  if (is.numeric(x)) {
+  if(is.numeric(x)) {
     replace_na(x, mean(x, na.rm = TRUE))
   }
   else if(is.character(x)) {
@@ -124,9 +124,9 @@ filling_table = function(x) {
 
 Step3: Applying the function
 ```{r}
-filled_data = map(iris_with_missing, filling_table) %>%
+iris_with_filled = map(iris_with_missing, filling_table) %>%
   as_tibble()
 
-filled_data
+iris_with_filled
 ```
 
