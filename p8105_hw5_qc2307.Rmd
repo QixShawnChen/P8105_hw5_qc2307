@@ -17,16 +17,16 @@ library(httr)
 
 Problem 1
 ```{r}
-url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
-drug_use_html = read_html(url)
+#url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
+#drug_use_html = read_html(url)
 
-drug_use_html
+#drug_use_html
 
-table_marj = 
-  drug_use_html %>% 
-  html_table() %>% 
-  first() %>%
-  as_tibble()
+#table_marj = 
+#  drug_use_html %>% 
+#  html_table() %>% 
+#  first() %>%
+#  as_tibble()
 ```
 
 
@@ -47,7 +47,16 @@ dataframe_new =
   mutate(
     data = purrr::map(.x = str_c("./untitled folder/data/", files), ~ read_csv(.x))
     ) %>%
-  unnest(data) %>%
+  unnest(data)
+
+dataframe_new
+```
+
+
+Step3: Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
+```{r}
+dataframe_new = 
+  dataframe_new %>%
   separate(files, into = c("arm", "subject_id", "csv")) %>%
   select(-csv) %>%
   pivot_longer(
@@ -63,7 +72,9 @@ dataframe_new =
 dataframe_new
 ```
 
-Step3: Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
+
+
+Step4: Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
 ```{r}
 spaghetti_plot = 
   dataframe_new %>%
@@ -84,7 +95,7 @@ spaghetti_plot
 
 
 # Problem 3
-
+Step1: The code chunk below loads the iris dataset from the tidyverse package
 ```{r}
 set.seed(10)
 
@@ -97,6 +108,8 @@ iris_with_missing
 ```
 
 Step2: Write a function to serve filling in the missing values
+requirement1: For numeric variables, you should fill in missing values with the mean of non-missing values.
+requirement2: For character variables, you should fill in missing values with "virginica".
 ```{r}
 filling_table = function(x) {
   if (is.numeric(x)) {
