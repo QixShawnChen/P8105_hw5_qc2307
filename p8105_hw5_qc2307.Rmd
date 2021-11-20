@@ -14,20 +14,128 @@ library(readxl)
 library(httr)
 ```
 
-
-Problem 1
 ```{r}
-#url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
-#drug_use_html = read_html(url)
-
-#drug_use_html
-
-#table_marj = 
-#  drug_use_html %>% 
-#  html_table() %>% 
-#  first() %>%
-#  as_tibble()
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
+
+
+## Problem 1
+```{r}
+homicide_df = 
+  read.csv("./untitled folder/homicide-data.csv", na = c("", "Unknown")) %>%
+  mutate(
+    city_state = str_c(city, state),
+    resolution = case_when(
+      disposition == "Closed without arrest" ~ "unsolved",
+      disposition == "Open/No arrest" ~ "unsolved",
+      disposition == "Closed by arrest" ~ "solved"
+    )
+  ) %>%
+  relocate(city_state) %>%
+  filter(city_state != "TulsaAL")
+```
+
+focus on Baltimore.
+```{r}
+baltimore_df = 
+  homicide_df %>%
+  filter(city_state == "BaltimoreMD")
+
+baltimore_summary = 
+  baltimore_df %>%
+  summarize(
+    unsolved = sum(resolution == "unsolved"),
+    n = n()
+  )
+
+baltimore_test = 
+  prop.test(
+    x = baltimore_summary %>% pull(unsolved),
+    n = baltimore_summary %>% pull(n)
+  )
+baltimore_test %>%
+  broom::tidy()
+```
+
+
+```{r}
+prop_test_function = function(city_df) {
+  
+  city_summary = 
+    city_df %>%
+    summarize(
+      unsolved = sum(resolution == "unsolved"),
+      n = n()
+    )
+  
+  city_test = 
+    prop.test(
+      x = city_summary %>% pull(unsolved),
+      n = city_summary %>% pull(n)
+    )
+  return(city_test)
+}
+
+prop_test_function(baltimore_df)
+
+homicide_df %>%
+  filter(city_state == "AlbuquerqueNM") %>%
+  prop_test_function()
+```
+
+Iterate across all cities
+```{r}
+results_df = 
+  homicide_df %>%
+  nest(data = uid:resolution) %>%
+  mutate(
+    test_results = map(data, prop_test_function),
+    tidy_results = map(test_results, broom::tidy)
+  ) %>%
+  select(city_state, tidy_results) %>%
+  unnest(tidy_results) %>%
+  select(city_state, estimate, starts_with("conf"))
+```
+
+
+make a plot showing estimates and confidence intervals.
+```{r}
+results_df %>% 
+  mutate(city_state = fct_reorder(city_state, estimate)) %>% 
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() + 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+
+```{r}
+homicide_df %>%
+  group_by(city_state) %>%
+  summarize(
+    unsolved = sum(resolution == "unsolve"),
+    n = n()
+  ) %>%
+  mutate(
+    test_results = map2(unsolved, n, prop.test),
+    tidy_results = map(test_results, broom::tidy)
+  ) %>%
+  select(city_state, tidy_results) %>%
+  unnest(tidy_results) %>%
+  select(city_state, estimate, starts_with("conf"))
+```
+
 
 
 ## Problem 2
@@ -86,12 +194,12 @@ spaghetti_plot =
   labs(
     tittle = "Observations on Each Subject Over Time",
     x = "Week",
-    y = "Observations"
+    y = "Observation values"
   )
 
 spaghetti_plot
 ```
-Comment:
+Comment: In the two graphs, the graph for control group doesn't have a really clear trend between the independent variable, week, and dependent variable, observation values. In the graph for experimental group, we can observe that there is a generally positive trend between the independent variable, week, and dependent variable, observation values. In this plot, with the increase in week, generally there will be an increase in observation values.
 
 
 # Problem 3
