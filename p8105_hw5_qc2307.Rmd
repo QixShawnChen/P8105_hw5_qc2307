@@ -5,7 +5,7 @@ date: "11/20/2021"
 output: github_document
 ---
 
-```{r}
+```{r message = FALSE}
 library(tidyverse)
 library(ggplot2)
 library(p8105.datasets)
@@ -149,7 +149,7 @@ file_name
 
 
 #### Step2: Iterate over file names and read in data for each subject and saving the result as a new variable in the dataframe.
-```{r}
+```{r message = FALSE}
 dataframe_new = 
   file_name %>%
   mutate(
