@@ -139,7 +139,7 @@ homicide_df %>%
 
 
 ## Problem 2
-Step1: create a dataframe containing all files names.
+#### Step1: create a dataframe containing all files names.
 ```{r}
 file_name = tibble(
   files = list.files("./untitled folder/data")
@@ -148,7 +148,7 @@ file_name
 ```
 
 
-Step2: Iterate over file names and read in data for each subject and saving the result as a new variable in the dataframe.
+#### Step2: Iterate over file names and read in data for each subject and saving the result as a new variable in the dataframe.
 ```{r}
 dataframe_new = 
   file_name %>%
@@ -161,7 +161,7 @@ dataframe_new
 ```
 
 
-Step3: Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
+#### Step3: Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
 ```{r}
 dataframe_new = 
   dataframe_new %>%
@@ -182,7 +182,7 @@ dataframe_new
 
 
 
-Step4: Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
+#### Step4: Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
 ```{r}
 spaghetti_plot = 
   dataframe_new %>%
@@ -203,7 +203,7 @@ Comment: In the two graphs, the graph for control group doesn't have a really cl
 
 
 # Problem 3
-Step1: The code chunk below loads the iris dataset from the tidyverse package
+#### Step1: The code chunk below loads the iris dataset from the tidyverse package
 ```{r}
 set.seed(10)
 
@@ -215,7 +215,7 @@ iris_with_missing = iris %>%
 iris_with_missing
 ```
 
-Step2: Write a function to serve filling in the missing values
+#### Step2: Write a function to serve filling in the missing values
 requirement1: For numeric variables, you should fill in missing values with the mean of non-missing values.
 requirement2: For character variables, you should fill in missing values with "virginica".
 ```{r}
@@ -230,7 +230,7 @@ filling_table = function(x) {
 ```
 
 
-Step3: Applying the function
+#### Step3: Applying the function
 ```{r}
 iris_with_filled = map(iris_with_missing, filling_table) %>%
   as_tibble()
